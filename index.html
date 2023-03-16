@@ -67,39 +67,45 @@
         {x: 1, y: 1},
       ],
     ];
-
     let currentTetromino = null;
-    let timer = null;
-    let score = 0;
+let timer = null;
+let score = 0;
 
-    function generateTetromino() {
-      const tetromino = tetrominoes[Math.floor(Math.random() * tetrominoes.length)];
-      const color = '#' + Math.floor(Math.random()*16777215).toString(16); // Generate a random color
-      currentTetromino = {
-        shape: tetromino,
-        x: 3,
-        y: 0,
-        color: color,
-      };
-      drawTetromino();
+function generateTetromino() {
+  const tetromino = tetrominoes[Math.floor(Math.random() * tetrominoes.length)];
+  const color = '#' + Math.floor(Math.random()*16777215).toString(16); // Generate a random color
+  currentTetromino = {
+    shape: tetromino,
+    x: 3,
+    y: 0,
+    color: color,
+  };
+  if (!collision()) {
+    drawTetromino();
+  } else {
+    gameOver();
+  }
+}
+
+function drawTetromino(fixed = false) {
+  const { shape, x, y, color } = currentTetromino;
+  shape.forEach(block => {
+    const blockDiv = document.createElement("div");
+    blockDiv.className = "block";
+    if (fixed) {
+      blockDiv.classList.add("fixed");
     }
-
-    function drawTetromino() {
-      const { shape, x, y, color } = currentTetromino;
-      shape.forEach(block => {
-        const blockDiv = document.createElement('div');
-        blockDiv.className = 'block';
-        blockDiv.style.top = (y + block.y) * 20 + 'px';
-blockDiv.style.left = (x + block.x) * 20 + 'px';
-blockDiv.style.backgroundColor = color;
-board.appendChild(blockDiv);
-});
+    const row = y + block.y;
+    const col = x + block.x;
+    blockDiv.setAttribute("data-row", row);
+    blockDiv.setAttribute("data-col", col);
+    blockDiv.style.top = row * 20 + "px";
+    blockDiv.style.left = col * 20 + "px";
+    blockDiv.style.backgroundColor = color;
+    board.appendChild(blockDiv);
+  });
 }
 
-function removeTetromino() {
-  const blocks = document.querySelectorAll('.block');
-  blocks.forEach(block => block.parentNode.removeChild(block));
-}
 
 function moveTetromino() {
   const { shape, x, y } = currentTetromino;
@@ -115,21 +121,28 @@ function moveTetromino() {
   }
 }
 
+
+function removeTetromino() {
+  const blocks = document.querySelectorAll('.block:not(.fixed)');
+  blocks.forEach(block => block.parentNode.removeChild(block));
+}
+
+
+
+
 function rotateTetromino() {
   const { shape } = currentTetromino;
   const rotatedShape = shape.map(block => ({
     x: block.y,
     y: -block.x,
   }));
+  removeTetromino();
   currentTetromino.shape = rotatedShape;
   if (collision()) {
     currentTetromino.shape = shape;
-  } else {
-    removeTetromino();
-    drawTetromino();
   }
+  drawTetromino();
 }
-
 
 function moveTetrominoSideways(direction) {
   const { shape, x } = currentTetromino;
@@ -143,15 +156,19 @@ function moveTetrominoSideways(direction) {
 
 function collision() {
   const { shape, x, y } = currentTetromino;
+
   for (let i = 0; i < shape.length; i++) {
     const block = shape[i];
     const row = y + block.y;
     const column = x + block.x;
+
     if (row >= 20 || column < 0 || column >= 10) {
       return true;
     }
-    const existingBlock = document.elementFromPoint(column * 20 + 10, row * 20 + 10);
-    if (existingBlock && existingBlock.classList.contains('block') && !existingBlock.classList.contains('current-block')) {
+
+    const existingBlock = document.querySelector(`.block.fixed[data-row="${row}"][data-col="${column}"]`);
+
+    if (existingBlock) {
       return true;
     }
   }
@@ -160,30 +177,25 @@ function collision() {
 
 
 function checkCompletedRows() {
-  const rows = [];
-  const blocks = document.querySelectorAll('.block');
-  blocks.forEach(block => {
-    const row = Math.floor((block.offsetTop - 1) / 20);
-    if (rows.indexOf(row) === -1) {
-      rows.push(row);
-    }
-  });
-  rows.sort();
-  rows.forEach(row => {
-    const blocksInRow = document.querySelectorAll(`.block:nth-child(4n + ${row * 4 + 1})`);
-    if (blocksInRow.length === 10) {
+  const rowCount = 20;
+  const colCount = 10;
+  
+  for (let row = 0; row < rowCount; row++) {
+    const blocksInRow = document.querySelectorAll(`.block.fixed[data-row="${row}"]`);
+    if (blocksInRow.length === colCount) {
       score += 100;
       blocksInRow.forEach(block => block.parentNode.removeChild(block));
-      const blocksAbove = document.querySelectorAll(`.block:not(.removed):not(:nth-child(4n + ${row * 4 + 1}))`);
+      
+      const blocksAbove = document.querySelectorAll(`.block.fixed[data-row]:not([data-row="${row}"])`);
       blocksAbove.forEach(block => {
-        const rowAbove = Math.floor((block.offsetTop - 1) / 20);
+        const rowAbove = parseInt(block.getAttribute("data-row"), 10);
         if (rowAbove < row) {
           block.style.top = (rowAbove + 1) * 20 + 'px';
+          block.setAttribute("data-row", rowAbove + 1);
         }
       });
-      blocks.forEach(block => block.classList.remove('removed'));
     }
-  });
+  }
 }
 
 function gameOver() {
@@ -195,42 +207,35 @@ document.addEventListener('keydown', event => {
   switch (event.keyCode) {
     case 37: // left arrow
       moveTetrominoSideways(-1);
-break;
-case 38: // up arrow
-rotateTetromino();
-break;
-case 39: // right arrow
-moveTetrominoSideways(1);
-break;
-case 40: // down arrow
-moveTetromino();
-break;
-}
+      break;
+    case 38: // up arrow
+      rotateTetromino();
+      break;
+    case 39: // right arrow
+      moveTetrominoSideways(1);
+      break;
+    case 40: // down arrow
+      moveTetromino();
+      break;
+  }
 });
-generateTetromino();
-timer = setInterval(moveTetromino, 500);
-
-
-
-
-
 
 function startGame() {
-    if(timer) clearInterval(timer);
-    score = 0;
-    board.innerHTML = '';
-    generateTetromino();
-    timer = setInterval(moveTetromino, 500);
+  if (timer) clearInterval(timer);
+  score = 0;
+  board.innerHTML = '';
+  generateTetromino();
+  timer = setInterval(moveTetromino, 500);
 }
 
 function endGame() {
-    if(timer) clearInterval(timer);
-    alert(`Game over! Your score: ${score}`);
+  if (timer) clearInterval(timer);
+  alert(`Game over! Your score: ${score}`);
 }
 
+startGame();
 </script>
-<button onclick="startGame()">Start Game</button>
-<button onclick="endGame()">End Game</button>
+  <button onclick="startGame()">Start Game</button>
+  <button onclick="endGame()">End Game</button>
 </body>
 </html>
-
