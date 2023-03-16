@@ -3,24 +3,30 @@
 <head>
   <meta charset="utf-8">
   <title>Tetris Game</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+
   <style>
-    #board {
-      width: 200px;
-      height: 400px;
-      border: 1px solid black;
-      position: relative;
-    }
-    .block {
-      width: 20px;
-      height: 20px;
-      border: 1px solid black;
-      position: absolute;
-    }
-  </style>
+  .block {
+    width: 20px;
+    height: 20px;
+    border: 1px solid black;
+    position: absolute;
+  }
+</style>
+
 </head>
-<body>
-  <div id="board"></div>
-  <p>Score: <span id="score">0</span></p>
+<body class="bg-gray-100 min-h-screen">
+  <div class="container mx-auto px-4 py-5">
+    <h1 class="text-3xl font-bold mb-5 text-center">Tetris Game</h1>
+    <p class="text-xl mb-3">Score: <span id="score" class="font-bold">0</span></p>
+    <div>
+    <div id="board" class="bg-white border border-gray-300 w-48 h-96 mx-auto relative mb-5" style="width: 200px; height: 400px;"></div>
+    <div class="text-center">
+      <button onclick="startGame()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Start Game</button>
+      <button onclick="endGame()" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">End Game</button>
+    </div>
+  </div>
+  
 
   <script>
     const board = document.getElementById('board');
@@ -241,7 +247,7 @@ function endGame() {
 
 startGame();
 </script>
-  <button onclick="startGame()">Start Game</button>
-  <button onclick="endGame()">End Game</button>
+  
+  
 </body>
 </html>
