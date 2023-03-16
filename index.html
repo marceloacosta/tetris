@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Tetris Game</title>
+  <style>
+    #board {
+      width: 200px;
+      height: 400px;
+      border: 1px solid black;
+      position: relative;
+    }
+    .block {
+      width: 20px;
+      height: 20px;
+      border: 1px solid black;
+      position: absolute;
+    }
+  </style>
+</head>
+<body>
+  <div id="board"></div>
+  <script>
+    const board = document.getElementById('board');
+    const tetrominoes = [
+      // Define the seven Tetromino shapes
+      [
+        {x: 0, y: 1},
+        {x: 1, y: 1},
+        {x: 2, y: 1},
+        {x: 3, y: 1},
+      ],
+      [
+        {x: 0, y: 0},
+        {x: 0, y: 1},
+        {x: 1, y: 1},
+        {x: 2, y: 1},
+      ],
+      [
+        {x: 0, y: 1},
+        {x: 1, y: 1},
+        {x: 1, y: 0},
+        {x: 2, y: 0},
+      ],
+      [
+        {x: 0, y: 0},
+        {x: 1, y: 0},
+        {x: 1, y: 1},
+        {x: 2, y: 1},
+      ],
+      [
+        {x: 0, y: 0},
+        {x: 1, y: 0},
+        {x: 1, y: 1},
+        {x: 0, y: 1},
+      ],
+      [
+        {x: 0, y: 1},
+        {x: 1, y: 1},
+        {x: 2, y: 1},
+        {x: 2, y: 0},
+      ],
+      [
+        {x: 0, y: 0},
+        {x: 0, y: 1},
+        {x: 1, y: 0},
+        {x: 1, y: 1},
+      ],
+    ];
+
+    let currentTetromino = null;
+    let timer = null;
+    let score = 0;
+
+    function generateTetromino() {
+      const tetromino = tetrominoes[Math.floor(Math.random() * tetrominoes.length)];
+      const color = '#' + Math.floor(Math.random()*16777215).toString(16); // Generate a random color
+      currentTetromino = {
+        shape: tetromino,
+        x: 3,
+        y: 0,
+        color: color,
+      };
+      drawTetromino();
+    }
+
+    function drawTetromino() {
+      const { shape, x, y, color } = currentTetromino;
+      shape.forEach(block => {
+        const blockDiv = document.createElement('div');
+        blockDiv.className = 'block';
+        blockDiv.style.top = (y + block.y) * 20 + 'px';
+blockDiv.style.left = (x + block.x) * 20 + 'px';
+blockDiv.style.backgroundColor = color;
+board.appendChild(blockDiv);
+});
+}
+
+function removeTetromino() {
+  const blocks = document.querySelectorAll('.block');
+  blocks.forEach(block => block.parentNode.removeChild(block));
+}
+
+function moveTetromino() {
+  const { shape, x, y } = currentTetromino;
+  removeTetromino();
+  currentTetromino.y += 1;
+  if (collision()) {
+    currentTetromino.y -= 1;
+    drawTetromino(true);
+    checkCompletedRows();
+    generateTetromino();
+  } else {
+    drawTetromino();
+  }
+}
+
+function rotateTetromino() {
+  const { shape } = currentTetromino;
+  const rotatedShape = shape.map(block => ({
+    x: block.y,
+    y: -block.x,
+  }));
+  currentTetromino.shape = rotatedShape;
+  if (collision()) {
+    currentTetromino.shape = shape;
+  } else {
+    removeTetromino();
+    drawTetromino();
+  }
+}
+
+
+function moveTetrominoSideways(direction) {
+  const { shape, x } = currentTetromino;
+  removeTetromino();
+  currentTetromino.x += direction;
+  if (collision()) {
+    currentTetromino.x -= direction;
+  }
+  drawTetromino();
+}
+
+function collision() {
+  const { shape, x, y } = currentTetromino;
+  for (let i = 0; i < shape.length; i++) {
+    const block = shape[i];
+    const row = y + block.y;
+    const column = x + block.x;
+    if (row >= 20 || column < 0 || column >= 10) {
+      return true;
+    }
+    const existingBlock = document.elementFromPoint(column * 20 + 10, row * 20 + 10);
+    if (existingBlock && existingBlock.classList.contains('block') && !existingBlock.classList.contains('current-block')) {
+      return true;
+    }
+  }
+  return false;
+}
+
+
+function checkCompletedRows() {
+  const rows = [];
+  const blocks = document.querySelectorAll('.block');
+  blocks.forEach(block => {
+    const row = Math.floor((block.offsetTop - 1) / 20);
+    if (rows.indexOf(row) === -1) {
+      rows.push(row);
+    }
+  });
+  rows.sort();
+  rows.forEach(row => {
+    const blocksInRow = document.querySelectorAll(`.block:nth-child(4n + ${row * 4 + 1})`);
+    if (blocksInRow.length === 10) {
+      score += 100;
+      blocksInRow.forEach(block => block.parentNode.removeChild(block));
+      const blocksAbove = document.querySelectorAll(`.block:not(.removed):not(:nth-child(4n + ${row * 4 + 1}))`);
+      blocksAbove.forEach(block => {
+        const rowAbove = Math.floor((block.offsetTop - 1) / 20);
+        if (rowAbove < row) {
+          block.style.top = (rowAbove + 1) * 20 + 'px';
+        }
+      });
+      blocks.forEach(block => block.classList.remove('removed'));
+    }
+  });
+}
+
+function gameOver() {
+  clearInterval(timer);
+  alert('Game Over! Your score: ' + score);
+}
+
+document.addEventListener('keydown', event => {
+  switch (event.keyCode) {
+    case 37: // left arrow
+      moveTetrominoSideways(-1);
+break;
+case 38: // up arrow
+rotateTetromino();
+break;
+case 39: // right arrow
+moveTetrominoSideways(1);
+break;
+case 40: // down arrow
+moveTetromino();
+break;
+}
+});
+generateTetromino();
+timer = setInterval(moveTetromino, 500);
+
+
+
+
+
+
+function startGame() {
+    if(timer) clearInterval(timer);
+    score = 0;
+    board.innerHTML = '';
+    generateTetromino();
+    timer = setInterval(moveTetromino, 500);
+}
+
+function endGame() {
+    if(timer) clearInterval(timer);
+    alert(`Game over! Your score: ${score}`);
+}
+
+</script>
+<button onclick="startGame()">Start Game</button>
+<button onclick="endGame()">End Game</button>
+</body>
+</html>
+
