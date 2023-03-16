@@ -20,6 +20,8 @@
 </head>
 <body>
   <div id="board"></div>
+  <p>Score: <span id="score">0</span></p>
+
   <script>
     const board = document.getElementById('board');
     const tetrominoes = [
@@ -194,6 +196,10 @@ function checkCompletedRows() {
           block.setAttribute("data-row", rowAbove + 1);
         }
       });
+
+      // Update the score display
+      const scoreElement = document.getElementById('score');
+      scoreElement.textContent = score;
     }
   }
 }
