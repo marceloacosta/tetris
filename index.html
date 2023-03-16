@@ -231,6 +231,14 @@ document.addEventListener('keydown', event => {
       break;
   }
 });
+    
+    
+document.getElementById('left-button').addEventListener('click', () => moveTetrominoSideways(-1));
+document.getElementById('right-button').addEventListener('click', () => moveTetrominoSideways(1));
+document.getElementById('down-button').addEventListener('click', moveTetromino);
+document.getElementById('rotate-button').addEventListener('click', rotateTetromino);
+    
+    
 
 function startGame() {
   if (timer) clearInterval(timer);
@@ -244,7 +252,13 @@ function endGame() {
   if (timer) clearInterval(timer);
   alert(`Game over! Your score: ${score}`);
 }
-
+    
+<button id="left-button">Left</button>
+<button id="right-button">Right</button>
+<button id="down-button">Down</button>
+<button id="rotate-button">Rotate</button>
+    
+    
 startGame();
 </script>
   
