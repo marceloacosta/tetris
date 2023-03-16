@@ -12,6 +12,15 @@
     border: 1px solid black;
     position: absolute;
   }
+    
+    .unselectable {
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    }
+    
+    
 </style>
 
 </head>
@@ -24,16 +33,16 @@
     
       
      <div class="text-center mb-4">
-  <button onclick="startGame()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2">Start Game</button>
-  <button onclick="endGame()" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">End Game</button>
+  <button onclick="startGame()" class="unselectable bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2">Start Game</button>
+  <button onclick="endGame()" class="unselectable bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">End Game</button>
 </div>
 <div class="flex justify-center mb-4">
-  <button id="left-button" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2">Left</button>
+  <button id="left-button" class="unselectable bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2">Left</button>
   <div class="flex flex-col">
-    <button id="rotate-button" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-2">Rotate</button>
-    <button id="down-button" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Down</button>
+    <button id="rotate-button" class="unselectable bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-2">Rotate</button>
+    <button id="down-button" class="unselectable bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Down</button>
   </div>
-  <button id="right-button" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2">Right</button>
+  <button id="right-button" class="unselectable bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2">Right</button>
 </div>
 
       
